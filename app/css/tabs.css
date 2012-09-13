@@ -1,0 +1,89 @@
+.tabs {
+  list-style-type: none;
+  overflow: hidden;
+  height: 35px;
+  margin: 0;
+  padding: 0;
+}
+.tabs li {
+  margin-top: 10px;
+  height: 60px;
+  width: 0;
+  position: relative;
+  float: left;
+  border-top-right-radius: 20px 60px;
+  border-top-left-radius: 20px 60px;
+  border: 1px solid transparent;
+  margin-left: -25px;
+  z-index: 1;
+}
+.tabs li a {
+  display: block;
+  line-height: 25px;
+  padding-left: 20px;
+  margin-right: 32px;
+  overflow: hidden;
+  color: #444;
+}
+.tabs li a.icon {
+  position: absolute;
+  right: 20px;
+  top: 2px;
+  font-size: 0.7em;
+  padding: 0;
+  margin: 0;
+}
+.tabs li a.icon-remove:hover {
+  color: red;
+}
+.tabs li:first-child {
+  margin-left: 48px;
+}
+.tabs li.selected {
+  z-index: 2;
+}
+.tabs li.add-new {
+  width: 47px;
+  margin-top: 15px;
+  z-index: 0;
+}
+.tabs li.add-new a {
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  margin-left: 18px;
+}
+.left-mask,
+.right-mask {
+  width: 10px;
+  height: 3px;
+  overflow: hidden;
+  position: absolute;
+  top: 20px;
+}
+.left-mask span,
+.right-mask span {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-width: 5px;
+  border-style: solid;
+  border-radius: 10px;
+}
+.selected .left-mask,
+.selected .right-mask {
+  height: 4px;
+}
+.left-mask {
+  left: -1px;
+}
+.left-mask span {
+  margin: -10px -9px;
+}
+.right-mask {
+  right: -1px;
+}
+.right-mask span {
+  margin: -10px 0px;
+}

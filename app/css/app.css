@@ -1,0 +1,276 @@
+.non-app-draggable {
+  -webkit-widget-region: region(control rectangle);
+}
+.non-selectable {
+  user-select: none;
+}
+.non-draggable {
+  -webkit-user-drag: none;
+}
+body {
+  overflow: hidden;
+  line-height: 18px;
+  font-size: 13px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+a {
+  text-decoration: none;
+}
+header {
+  user-select: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+}
+header .main-icons {
+  -webkit-widget-region: region(control rectangle);
+  -webkit-user-drag: none;
+  position: absolute;
+  right: 8px;
+  top: 9px;
+  z-index: 2;
+}
+header .main-icons a {
+  color: #979797;
+  font-size: 1.2em;
+  position: relative;
+  padding: 1px;
+}
+header .main-icons a:hover {
+  text-decoration: none;
+  color: #444;
+}
+header .tabs li {
+  -webkit-widget-region: region(control rectangle);
+  -webkit-user-drag: none;
+}
+#editor {
+  -webkit-widget-region: region(control rectangle);
+  position: absolute;
+  top: 42px;
+  bottom: 30px;
+  left: 0;
+  right: 0;
+}
+a {
+  -webkit-user-drag: none;
+}
+#footer {
+  -webkit-widget-region: region(control rectangle);
+  -webkit-user-drag: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+#status-bar {
+  background-color: #EBEBEB;
+  border-top: 1px solid #CBCBCB;
+  color: #A4A4A4;
+  padding: 2px 6px;
+  -webkit-box-shadow: 0 -3px 6px -3px #cbcbcb;
+}
+#status-bar a {
+  color: inherit;
+  font-size: 1.4em;
+  line-height: 9px;
+  position: relative;
+  top: 3px;
+}
+#status-bar .delimiter {
+  border-right: 1px solid #D6D6D6;
+  margin: 0 5px;
+}
+#status-bar input {
+  margin: -4px 0px -2px 0px;
+  padding: 0px 2px 0 2px;
+}
+.selectable {
+  display: inline-block;
+  position: relative;
+}
+.selectable select {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+#settings {
+  background-color: #D6D6D6;
+  height: 0;
+  overflow: hidden;
+  -webkit-transition: height 0.2s ease-in-out;
+}
+#settings form .row {
+  margin-bottom: 5px;
+}
+#settings form label {
+  float: left;
+  display: block;
+  width: 140px;
+  padding-top: 3px;
+  padding-right: 10px;
+  text-align: right;
+}
+#settings form select {
+  display: inline-block;
+  width: 220px;
+  border: 1px solid #BBB;
+  height: 24px;
+  margin: 0;
+  color: #555;
+  vertical-align: middle;
+}
+#settings .inner {
+  padding: 25px 0;
+  border-top: 2px solid #CBCBCB;
+  min-width: 680px;
+  color: #555;
+}
+#settings.open-true {
+  height: 170px;
+  overflow-x: scroll;
+}
+#search {
+  position: absolute;
+  top: -9px;
+  right: 15px;
+  width: 258px;
+  height: 22px;
+  padding: 6px;
+  z-index: 1;
+  border: 1px solid #9C9C9C;
+  border-radius: 10px 10px;
+  background: -webkit-linear-gradient(top, #dcdddc 20%, #cfd0cf 65%);
+}
+#search input {
+  border: 1px solid #9C9C9C;
+  border-radius: 4px 4px;
+  border-top-right-radius: 0 0;
+  border-bottom-right-radius: 0 0;
+  padding: 3px 5px 4px 5px;
+  margin: 0;
+  color: #555;
+  width: 180px;
+  float: left;
+}
+#search a {
+  float: left;
+  height: 20px;
+  width: 20px;
+  text-align: center;
+}
+#search a.previous,
+#search a.next {
+  line-height: 20px;
+  color: #444;
+  background-color: #DEDFDF;
+  border: 1px solid #9C9C9C;
+  border-left: 0;
+}
+#search a.previous:hover,
+#search a.next:hover {
+  background: -webkit-linear-gradient(top, #ededed 20%, #dedfdf 65%);
+}
+#search input:focus {
+  outline: none;
+}
+#search a.previous {
+  border-right: 0;
+}
+#search a.next {
+  border-top-right-radius: 5px 5px;
+  border-bottom-right-radius: 5px 5px;
+}
+#search a.close {
+  line-height: 23px;
+  margin-left: 5px;
+  border: 0;
+  color: #979797;
+}
+#search a.close:hover {
+  color: #444;
+}
+#search.open-true {
+  top: 50px;
+  -webkit-transition: top 0.2s ease-in;
+}
+#search.open-false {
+  top: -9px;
+  -webkit-transition: top 0.2s ease-in;
+}
+.right {
+  float: right;
+}
+.ng-cloak {
+  display: none !important;
+}
+.ace_gutter {
+  font-size: 10px;
+  min-width: 50px;
+}
+.ace_gutter-cell {
+  padding-left: 5px !important;
+  line-height: 19px;
+}
+.gutter-bg {
+  position: absolute;
+  top: 35px;
+  bottom: 23px;
+  z-index: 0;
+  left: 0;
+  width: 50px;
+}
+.controller-highlight {
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  position: absolute;
+  opacity: 0.5;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+.controller-highlight span {
+  color: black;
+  font-size: 40pt;
+  display: block;
+  font-weight: bold;
+}
+.controller-highlight.App {
+  z-index: 1000;
+  background: #7BFF61;
+  top: 0;
+  bottom: 0;
+}
+.controller-highlight.App span {
+  margin-top: 48%;
+}
+.controller-highlight.StatusBar {
+  background: #FF6161;
+  height: 23px;
+  bottom: 170px;
+}
+.controller-highlight.StatusBar span {
+  margin-top: -10px;
+}
+.controller-highlight.Settings {
+  background: #FFFF61;
+  height: 170px;
+  bottom: 0;
+}
+.controller-highlight.Settings span {
+  margin-top: 70px;
+}
+.controller-highlight.Tabs {
+  background: #6179FF;
+  top: 0;
+  height: 35px;
+}
+.controller-highlight.Tabs span {
+  margin-top: 14px;
+}
