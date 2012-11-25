@@ -1,5 +1,7 @@
 TD.factory('fs', function($q, $rootScope, log) {
 
+  var endpoint = 'http://127.0.0.1:1337/';
+
   var createErrorHandler = function(defered) {
     return function(e) {
       var msg = '';
@@ -39,50 +41,43 @@ TD.factory('fs', function($q, $rootScope, log) {
     saveFile: function(fileEntry, content, type) {
       var defered = $q.defer();
 
-      fileEntry.createWriter(function(writer) {
-        var blob = new Blob([content], {type: type || 'text/plain'});
-        var error = false;
+      var req = new XMLHttpRequest();
+      req.open('PUT', endpoint + fileEntry.fullPath, true);
+      req.setRequestHeader('Content-Type', type || 'text/plain');
+      req.onreadystatechange = function() {
+        if (req.readyState != 4)
+          return;
 
-        writer.onwriteend = function(e) {
-          writer.onwriteend = function(e) {
-            if (!error) {
-              defered.resolve(true);
-              log('File saved ', fileEntry, e);
-              $rootScope.$digest();
-            }
-          };
-
-          writer.truncate(blob.size);
-        };
-
-        writer.onerror = function(e) {
-          error = true;
-          defered.reject(e);
-          log('File saving failed ', fileEntry, e);
-          $rootScope.$digest();
-        };
-
-        writer.write(blob);
-      }, createErrorHandler(defered));
+        if (req.status === 200) {
+          defered.resolve();
+        } else {
+          defered.reject(req.statusText);
+        }
+        $rootScope.$digest();
+      };
+      req.send(content);
 
       return defered.promise;
     },
-
 
     loadFile: function(fileEntry) {
       var defered = $q.defer();
       log('Loading file', fileEntry);
 
-      fileEntry.file(function(file) {
-        var fr = new FileReader();
+      var req = new XMLHttpRequest();
+      req.open('GET', endpoint + fileEntry.fullPath, true);
+      req.onreadystatechange = function() {
+        if (req.readyState != 4)
+          return;
 
-        fr.onload = function(e) {
-          defered.resolve(this.result);
-          log('File loaded', fileEntry);
-          $rootScope.$digest();
-        };
-        fr.readAsText(file);
-      }, createErrorHandler(defered));
+        if (req.status === 200) {
+          defered.resolve(req.responseText);
+        } else {
+          defered.reject(req.statusText);
+        }
+        $rootScope.$digest();
+      };
+      req.send();
 
       return defered.promise;
     }
