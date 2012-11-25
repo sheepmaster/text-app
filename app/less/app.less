@@ -230,11 +230,10 @@ a {
 
 // SEARCH
 ////////////////////////////////////////////////////////////////////////////////
-#search {
+.overlay {
   position: absolute;
   top: -9px;
   right: 15px;
-  width: 258px;
   height: 22px;
   padding: 6px;
   z-index: 1;
@@ -290,7 +289,7 @@ a {
 
   a.close {
     line-height: 23px;
-    margin-left: 5px;
+    margin: 0 5px;
     border: 0;
     color: #979797;
   }
@@ -298,18 +297,36 @@ a {
   a.close:hover {
     color: #444;
   }
+
+  label {
+    margin-left: 5px;
+  }
 }
 
-#search.open-true {
+.overlay.open-true {
   top: 50px;
   -webkit-transition: top 0.2s ease-in;
 }
 
-#search.open-false {
+.overlay.open-false {
   top: -9px;
   -webkit-transition: top 0.2s ease-in;
 }
 
+#file-selector {
+  input {
+    width: 250px;
+  }
+
+  label {
+    vertical-align: -1px;
+  }
+
+  .controls {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
 
 .right {
   float: right;

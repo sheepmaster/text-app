@@ -1,19 +1,20 @@
 var MAXIMIZE_TITLE = 'Maximize';
 var RESTORE_TITLE = 'Restore';
 
-TD.controller('App', function($scope, settings, editor, focus) {
+TD.controller('App', function($scope, settings, editor, focus, $rootScope) {
 
   $scope.settings = settings;
 
   $scope.isSettingsVisible = false;
   $scope.isSearchVisible = false;
-
+  $scope.isFileSelectorVisible = false;
 
   $scope.toggleSearch = function(value) {
     $scope.isSearchVisible = angular.isDefined(value) ? value : !$scope.isSearchVisible;
 
     if ($scope.isSearchVisible) {
       focus('input[ng-model=search]');
+      $scope.isFileSelectorVisible = false;
     } else {
       $scope.search = '';
       editor.clearFilter();
@@ -79,11 +80,31 @@ TD.controller('App', function($scope, settings, editor, focus) {
     }
   };
 
+  $scope.openFileSelector = function() {
+    $scope.isSearchVisible = false;
+    $scope.isFileSelectorVisible = true;
+    focus('input[ng-model=file]');
+  }
+
+  $scope.cancelFileSelector = function() {
+    $scope.isFileSelectorVisible = false;
+    editor.focus();
+  }
+
+  $scope.fileSelected = function() {
+    $rootScope.$broadcast('file_selected', $scope.file);
+    $scope.file = '';
+    $scope.cancelFileSelector();
+  };
 
   $scope.$on('search', function() {
     $scope.toggleSearch();
+    $scope.cancelFileSelector();
   });
 
+  $scope.$on('select_file', function() {
+    $scope.openFileSelector();
+  });
 
   $scope.$on('tab_deselected', function() {
     $scope.toggleSearch(false);

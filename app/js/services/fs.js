@@ -51,7 +51,7 @@ TD.factory('fs', function($q, $rootScope, log) {
         if (req.status === 200) {
           defered.resolve();
         } else {
-          defered.reject(req.statusText);
+          defered.reject(req.status + ' ' + req.statusText);
         }
         $rootScope.$digest();
       };
@@ -73,7 +73,7 @@ TD.factory('fs', function($q, $rootScope, log) {
         if (req.status === 200) {
           defered.resolve(req.responseText);
         } else {
-          defered.reject(req.statusText);
+          defered.reject(req.status + ' ' + req.statusText);
         }
         $rootScope.$digest();
       };
