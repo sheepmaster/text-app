@@ -1,6 +1,6 @@
 TD.factory('fs', function($http, log) {
 
-  var endpoint = 'http://127.0.0.1:1337/';
+  var endpoint = '/api/';
 
   return {
     saveFile: function(fileEntry, content, type) {
