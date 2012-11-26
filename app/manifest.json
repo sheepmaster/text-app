@@ -1,7 +1,7 @@
 {
-  "name": "Text Drive",
-  "description": "Just a text editor.",
-  "version": "0.0.34",
+  "name": "Text HyperDrive",
+  "description": "More than just a text editor.",
+  "version": "0.1",
   "icons": {
     "16": "icon/16x16.png",
     "96": "icon/96x96.png",
@@ -10,7 +10,6 @@
   },
   "manifest_version": 2,
   "minimum_chrome_version": "23.0.1261",
-  "offline_enabled": true,
   "app": {
     "background": {
       "scripts": [
@@ -23,21 +22,8 @@
     "https://127.0.0.1/",
     "http://localhost/",
     "https://localhost/",
-    "experimental",
     "clipboardRead",
     "clipboardWrite",
-    "unlimitedStorage",
-    "storage",
-    {"fileSystem": ["write"]}
-  ],
-  "intents": {
-    "http://webintents.org/edit": [
-      {
-        "title": "TextDrive",
-        "type": [
-          "text/*"
-        ]
-      }
-    ]
-  }
+    "storage"
+  ]
 }
