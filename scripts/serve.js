@@ -1,12 +1,16 @@
 var connect = require('connect');
+var fs = require('fs');
 var http = require('http');
 var Path = require('path');
+var Q = require('q');
 var url = require('url');
 
+var pretty_print = true;
+
 function error(res, status, msg) {
-  msg = msg || http.STATUS_CODES[status];
+  console.error(status, msg);
   res.statusCode = status;
-  res.end(msg);
+  res.end(http.STATUS_CODES[status]);
 }
 
 function redirect(req, res) {
@@ -29,38 +33,32 @@ function cat(path, res) {
   var stream = fs.createReadStream(path);
   stream.on('error', function(err) {
     if (err.code == 'ENOENT') {
-      error(res, 404, 'File not found: \'' + path + '\'');
+      error(res, 404);
       return;
     }
-    error(res, 500, JSON.stringify(err))
+    error(res, 500, err);
   })
-  stream.on('open', function() {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-  });
   stream.pipe(res);
 }
 
-function ls(dir, res) {
-  Q.ncall(fs.readdir, fs, dir).then(function(files) {
+function ls(dir, real_dir, res) {
+  Q.ninvoke(fs, 'readdir', real_dir).then(function(files) {
     return Q.all(files.map(function(file) {
-      return Q.ncall(fs.stat, fs, file).then(function(stat) {
-        stat.file = file;
-        return stat;
+      return Q.ninvoke(fs, 'stat', real_dir + file).then(function(stat) {
+        return {
+          'file': file,
+          'full_path': dir + file,
+          'is_directory': stat.isDirectory()
+        };
       });
     }));
-  }).then(function(stats) {
+  }).then(function(listing) {
     res.writeHead(200, {'Content-Type': 'application/json'});
-    var listing = stats.map(function(stat) {
-      return {
-        'file': stat.file,
-        'is_dir': stat.isDirectory()
-      };
-    });
     res.end(pretty_print ? JSON.stringify(listing, null, '  ') :
                            JSON.stringify(listing));
   }, function(err) {
     error(res, 500, err);
-  });
+  }).done();
 }
 
 function echo(path, req, res) {
@@ -70,10 +68,10 @@ function echo(path, req, res) {
       error(res, 404, 'File not found: \'' + path + '\'');
       return;
     }
-    error(res, 500, JSON.stringify(err));
+    error(res, 500, err);
   });
   stream.on('open', function() {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.statusCode = 201;
   });
   req.on('end', function() {
     // If we haven't thrown an error, end the response.
@@ -84,8 +82,8 @@ function echo(path, req, res) {
 }
 
 function serve(dir, allowed_methods) {
-  return function(req, res, next) {
-    var path = decode(url.parse(req).pathname);
+  return function(req, res) {
+    var path = decode(url.parse(req.url).pathname);
     if (!path)
       return error(res, 400);
 
@@ -97,13 +95,13 @@ function serve(dir, allowed_methods) {
       return error(res, 403);
 
     var method = req.method;
-    if (~allowed_methods.indexOf(method))
+    if (allowed_methods.indexOf(method) == -1)
       return error(res, 501);
 
     switch(method) {
       case 'GET': {
-        if (is_dir) {
-          ls(full_path, res);
+        if (full_path[full_path.length - 1] == '/') {
+          ls(path, full_path, res);
         } else {
           cat(full_path, res);
         }
