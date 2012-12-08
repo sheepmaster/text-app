@@ -10,13 +10,9 @@ module webDAVFs {
     }
   }
 
-  export interface ErrorCallback {
-    (any);
-  }
-
   export interface DirectoryReader {
     readEntries (successCallback?: (entries: Entry[]) => void,
-                 errorCallback?: ErrorCallback): void;
+                 errorCallback?: (error: Error) => void): void;
   }
 
   export interface Flags {
@@ -33,22 +29,22 @@ module webDAVFs {
     isFile: bool;
     isDirectory: bool;
     getMetadata(successCallback: (Metadata) => void,
-                errorCallback?: ErrorCallback);
+                errorCallback?: (error: Error) => void);
     name: string;
     fullPath: string;
     filesystem: FileSystem;
     moveTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
-           errorCallback?: ErrorCallback);
+           errorCallback?: (error: Error) => void);
     copyTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
-           errorCallback?: ErrorCallback);
+           errorCallback?: (error: Error) => void);
     toURL(): string;
-    remove(successCallback: () => void, errorCallback?: ErrorCallback);
+    remove(successCallback: () => void, errorCallback?: (error: Error) => void);
     getParent(successCallback: (entry: Entry) => void,
-              errorCallback?: ErrorCallback);
+              errorCallback?: (error: Error) => void);
   }
 
   export interface DirectoryEntry extends Entry {
@@ -56,20 +52,20 @@ module webDAVFs {
     getFile(path: string,
             options?: Flags,
             successCallback?: (entry: Entry) => void,
-            errorCallback?: ErrorCallback): void;
+            errorCallback?: (error: Error) => void): void;
     getDirectory(path: string,
                  options?: Flags,
                  successCallback?: (entry: Entry) => void,
-                 errorCallback?: ErrorCallback): void;
+                 errorCallback?: (error: Error) => void): void;
     removeRecursively(successCallback?: () => void,
-                      errorCallback?: ErrorCallback): void;
+                      errorCallback?: (error: Error) => void): void;
   }
 
   export interface FileEntry extends Entry {
     createWriter(successCallback: (FileWriter) => void,
-                 errorCallback?: ErrorCallback);
+                 errorCallback?: (error: Error) => void);
     file(successCallback: (File) => void,
-         errorCallback?: ErrorCallback);
+         errorCallback?: (error: Error) => void);
   }
 
   /* Implementation */
@@ -93,8 +89,7 @@ module webDAVFs {
                 public fullPath: string) {
     }
 
-    getMetadata(successCallback: (Metadata) => void,
-                errorCallback?: ErrorCallback) {
+    getMetadata(successCallback, errorCallback?) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
@@ -102,7 +97,7 @@ module webDAVFs {
     moveTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
-           errorCallback?: ErrorCallback) {
+           errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
@@ -110,7 +105,7 @@ module webDAVFs {
     copyTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
-           errorCallback?: ErrorCallback) {
+           errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
@@ -120,21 +115,22 @@ module webDAVFs {
       return '';
     }
 
-    remove(successCallback: () => void, errorCallback?: ErrorCallback) {
+    remove(successCallback: () => void,
+           errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
 
     getParent(successCallback: (entry: Entry) => void,
-              errorCallback?: ErrorCallback) {
+              errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
 
     createReader() {
       return {
-        'readEntries': function(successCallback?: (entry: Entry[]) => void,
-                                errorCallback?: ErrorCallback) {
+        'readEntries': function(successCallback?: (entries: Entry[]) => void,
+                                errorCallback?: (error: Error) => void) {
           if (errorCallback)
             errorCallback(new Error('Not implemented'));
         }
@@ -144,7 +140,7 @@ module webDAVFs {
     getFile(path: string,
             options?: Flags,
             successCallback?: (entry: Entry) => void,
-            errorCallback?: ErrorCallback) {
+            errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
@@ -152,13 +148,13 @@ module webDAVFs {
     getDirectory(path: string,
                  options?: Flags,
                  successCallback?: (entry: Entry) => void,
-                 errorCallback?: ErrorCallback) {
+                 errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
 
     removeRecursively(successCallback?: () => void,
-                      errorCallback?: ErrorCallback) {
+                      errorCallback?: (error: Error) => void) {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
