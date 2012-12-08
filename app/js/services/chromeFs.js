@@ -1,4 +1,4 @@
-TD.factory('chromeFs', function($q, $rootScope, log) {
+TD.factory('chromeFs', function($rootScope, log) {
 
   var saved_callback;
 
