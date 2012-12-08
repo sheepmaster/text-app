@@ -47,13 +47,15 @@ angular.module('TD', ['TD.app', 'TD.log']).run(function($window, settings, edito
 
   document.addEventListener('keydown', function(event) {
 
+    // console.log(event);
+
     // ESC
     if (event.keyCode === 27) {
       applyEvent('escape', event);
       return;
     }
 
-    if (!event.metaKey && !event.ctrlKey) {
+    if (!event.altKey && !event.ctrlKey) {
       return;
     }
 
