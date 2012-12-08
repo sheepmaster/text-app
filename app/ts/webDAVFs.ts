@@ -1,31 +1,3 @@
-declare interface Blob {
-  type: string;
-  size: number;
-  slice(start?: number, end?: number, contentType?: string): Blob;
-  close(): void;
-}
-declare var Blob: {
-    prototype: Blob;
-    new (blobParts: any[]): Blob;
-    (): void;
-}
-
-declare interface Date {
-}
-declare var Date: {
-  now(): Date;
-}
-
-declare interface Error {
-  name: string;
-  message: string;
-}
-declare var Error: {
-  new (message?: string): Error;
-  (message?: string): Error;
-  prototype: Error;
-}
-
 module webDAVFs {
 
   export class FileSystem {
@@ -126,24 +98,21 @@ module webDAVFs {
     }
 
     getMetadata(successCallback, errorCallback?) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     moveTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
            errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     copyTo(parent: DirectoryEntry,
            newName?: string,
            successCallback?: (entry: Entry) => void,
            errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     toURL(): string {
@@ -153,14 +122,12 @@ module webDAVFs {
 
     remove(successCallback: () => void,
            errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     getParent(successCallback: (entry: Entry) => void,
               errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
   }
@@ -179,8 +146,7 @@ module webDAVFs {
       return {
         'readEntries': function(successCallback?: (entries: Entry[]) => void,
                                 errorCallback?: (error: Error) => void) {
-          if (errorCallback)
-            errorCallback(new Error('Not implemented'));
+          throw new Error('Not implemented');
         }
       };
     }
@@ -189,30 +155,19 @@ module webDAVFs {
             options?: Flags,
             successCallback?: (entry: Entry) => void,
             errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     getDirectory(path: string,
                  options?: Flags,
                  successCallback?: (entry: Entry) => void,
                  errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     removeRecursively(successCallback?: () => void,
                       errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
-    }
-  }
-
-  class FileImpl implements Blob {
-    constructor(blobParts: any[],
-                public lastModifiedDate: Date,
-                public name: string) {
-      Blob(blobParts);
+      throw new Error('Not implemented');
     }
   }
 
@@ -225,8 +180,7 @@ module webDAVFs {
 
     createWriter(successCallback: (writer: FileWriter) => void,
                  errorCallback?: (error: Error) => void) {
-      if (errorCallback)
-        errorCallback(new Error('Not implemented'));
+      throw new Error('Not implemented');
     }
 
     file(successCallback: (file: File) => void,
