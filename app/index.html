@@ -13,6 +13,12 @@
 <body ng-controller="App" ng-class="settings.theme.cls">
 
 <header ng-controller="Tabs">
+<div class="main-icons" ng-show="isApp">
+  <a ng-click="maximize()" class="icon-fullscreen" title="{{maximizeTitle}}"></a>
+  <a ng-click="quit()" class="icon-remove" title="Quit [CTRL+Q]"></a>
+</div>
+
+
 <ul class="tabs">
   <li ng-repeat="tab in tabs" ng-class="{selected: tab == tabs.current}" td-width="tabWidth" class="ng-cloak">
     <a ng-click="tabs.select(tab)" title="{{tab.label}}">{{tab.label}}</a>
@@ -36,10 +42,10 @@
 </div>
 
 <div id="file-selector" class="overlay open-{{isFileSelectorVisible}}">
-  <label for="file">Open:</label>
   <div class="controls">
-    <input type="text" id="file" ng-model="file" on-enter="fileSelected()">
-    <a ng-click="cancelFileSelector()" class="icon-remove close"></a>
+    <input type="text" placeholder="Enter a filename" id="file" ng-model="file" on-enter="fileSelected()">
+    <a ng-click="fileSelected()" class="icon-chevron-right full"></a>
+    <a ng-click="cancelFileSelector()" class="icon-remove full"></a>
   </div>
 </div>
 
@@ -114,6 +120,7 @@
 <script src="js/services/appWindow.js" type="text/javascript"></script>
 <script src="js/services/chromeFs.js" type="text/javascript"></script>
 <script src="js/services/editor.js" type="text/javascript"></script>
+<script src="js/services/fileSelectorUI.js" type="text/javascript"></script>
 <script src="js/services/focus.js" type="text/javascript"></script>
 <script src="js/services/fs.js" type="text/javascript"></script>
 <script src="js/services/log.js" type="text/javascript"></script>

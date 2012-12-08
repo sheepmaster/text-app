@@ -42,10 +42,26 @@ TD.factory('Tab', function(EditSession, $rootScope, log, modeForPath) {
 });
 
 
-TD.factory('tabs', function(editor, fs, log, Tab, chromeFs, lru, settings, $rootScope) {
+TD.factory('tabs', function(editor, fs, log, Tab, fileSelectorUI, lru, settings, $rootScope) {
 
   var tabs = [];
 
+  function findFileSelector() {
+    if (chrome.app && chrome.app.window) {
+      var url = chrome.app.window.current().webDAVUrl;
+      if (url)
+        return new fileSelectorUI(url);
+
+      if (chrome.fileSystem)
+        return chrome.fileSystem;
+      
+      throw new Error('Couldn\'t load file system');
+    }
+    // Fall back to a local WebDAV server.
+    return new fileSelectorUI('/dav/');
+  }
+
+  var fileSelector = findFileSelector();
 
   tabs.select = function(tab) {
     if (tabs.current) {
@@ -100,7 +116,7 @@ TD.factory('tabs', function(editor, fs, log, Tab, chromeFs, lru, settings, $root
     if (tab.file) {
       saveFile(tab.file);
     } else {
-      chromeFs.chooseFile({type: "saveFile"}, saveFile);
+      fileSelector.chooseFile({type: "saveFile"}, saveFile);
     }
   };
 
@@ -126,13 +142,13 @@ TD.factory('tabs', function(editor, fs, log, Tab, chromeFs, lru, settings, $root
     if (tab.file) {
       saveFile(tab.file);
     } else {
-      chromeFs.chooseFile({type: "saveFile"}, saveFile);
+      fileSelector.chooseFile({type: "saveFile"}, saveFile);
     }
   };
 
 
   tabs.open = function() {
-    chromeFs.chooseFile({type: 'openWritableFile'}, function(fileEntry) {
+    fileSelector.chooseFile({type: 'openWritableFile'}, function(fileEntry) {
       if (!fileEntry) {
         return;
       }

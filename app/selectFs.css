@@ -1,0 +1,21 @@
+body {
+  overflow: hidden;
+  line-height: 18px;
+  font-size: 13px;
+  font-family: sans-serif;
+}
+
+input[type=text] {
+  border: 1px solid #9C9C9C;
+  border-radius: 4px 4px;
+  border-top-right-radius: 0 0;
+  border-bottom-right-radius: 0 0;
+
+  padding: 3px 5px 4px 5px;
+  color: #555;
+  width: 180px;
+}
+
+input, button, label {
+  margin: 3px;
+}

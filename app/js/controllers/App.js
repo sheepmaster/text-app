@@ -1,3 +1,6 @@
+var MAXIMIZE_TITLE = 'Maximize';
+var RESTORE_TITLE = 'Restore';
+
 TD.controller('App', function($scope, settings, editor, focus, $rootScope) {
 
   $scope.settings = settings;
