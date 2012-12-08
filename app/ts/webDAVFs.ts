@@ -1,3 +1,31 @@
+declare interface Blob {
+  type: string;
+  size: number;
+  slice(start?: number, end?: number, contentType?: string): Blob;
+  close(): void;
+}
+declare var Blob: {
+    prototype: Blob;
+    new (blobParts: any[]): Blob;
+    (): void;
+}
+
+declare interface Date {
+}
+declare var Date: {
+  now(): Date;
+}
+
+declare interface Error {
+  name: string;
+  message: string;
+}
+declare var Error: {
+  new (message?: string): Error;
+  (message?: string): Error;
+  prototype: Error;
+}
+
 module webDAVFs {
 
   export class FileSystem {
@@ -8,6 +36,15 @@ module webDAVFs {
     static create(url: string): FileSystem {
       return new FileSystemImpl(url, url);
     }
+  }
+
+  export interface File extends Blob {
+    lastModifiedDate: Date;
+    name: string;
+  }
+
+  export interface FileWriter {
+    // XXX
   }
 
   export interface DirectoryReader {
@@ -80,11 +117,10 @@ module webDAVFs {
     }
   }
 
-  class DirectoryEntryImpl implements DirectoryEntry {
-    isFile = false;
-    isDirectory = true;
-
-    constructor(public filesystem: FileSystem,
+  class EntryImpl implements Entry {
+    constructor(public isFile: bool,
+                public isDirectory: bool,
+                public filesystem: FileSystem,
                 public name: string,
                 public fullPath: string) {
     }
@@ -127,6 +163,18 @@ module webDAVFs {
         errorCallback(new Error('Not implemented'));
     }
 
+  }
+
+  class DirectoryEntryImpl extends EntryImpl implements DirectoryEntry {
+    isFile = false;
+    isDirectory = true;
+
+    constructor(filesystem: FileSystem,
+                name: string,
+                fullPath: string) {
+      super(false, true, filesystem, name, fullPath);
+    }
+
     createReader() {
       return {
         'readEntries': function(successCallback?: (entries: Entry[]) => void,
@@ -158,5 +206,35 @@ module webDAVFs {
       if (errorCallback)
         errorCallback(new Error('Not implemented'));
     }
+  }
+
+  class FileImpl implements Blob {
+    constructor(blobParts: any[],
+                public lastModifiedDate: Date,
+                public name: string) {
+      Blob(blobParts);
+    }
+  }
+
+  class FileEntryImpl extends EntryImpl implements FileEntry {
+    constructor(filesystem: FileSystem,
+                name: string,
+                fullPath: string) {
+      super(true, false, filesystem, name, fullPath);
+    }
+
+    createWriter(successCallback: (writer: FileWriter) => void,
+                 errorCallback?: (error: Error) => void) {
+      if (errorCallback)
+        errorCallback(new Error('Not implemented'));
+    }
+
+    file(successCallback: (file: File) => void,
+         errorCallback?: (error: Error) => void) {
+/*      var file = new FileImpl(['mooh']);
+      file.name = "mooh";
+      file.lastModifiedDate = Date.now();
+      successCallback(file);
+*/    }
   }
 }
