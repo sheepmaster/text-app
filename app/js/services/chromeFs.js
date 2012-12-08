@@ -1,4 +1,8 @@
-TD.factory('chromeFs', function($rootScope, log) {
+TD.factory('chromeFs', function($rootScope, log, webDAVFs) {
+
+  var endpoint = '/dav/';
+
+  var fs = webDAVFs.create(endpoint);
 
   var saved_callback;
 
@@ -9,12 +13,8 @@ TD.factory('chromeFs', function($rootScope, log) {
     }
 
     saved_callback = callback;
-    var unregister =  $rootScope.$on('file_selected', function(event, path) {
-      var filename = path.replace(/.*\//, '');
-      callback({
-        'fullPath': path,
-        'name': filename
-      });
+    var unregister = $rootScope.$on('file_selected', function(event, path) {
+      fs.root.getFile(path, null, callback);
       unregister();
       saved_callback = null;
     });
