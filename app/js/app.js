@@ -55,7 +55,7 @@ angular.module('TD', ['TD.app', 'TD.log']).run(function($window, settings, edito
       return;
     }
 
-    if (!event.altKey && !event.ctrlKey) {
+    if (!event.altKey && !event.metaKey && !event.ctrlKey) {
       return;
     }
 
