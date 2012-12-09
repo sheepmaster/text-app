@@ -1,7 +1,7 @@
 TD.factory('fileSelectorUI', function($rootScope, log) {
 
   function fileSelectorUI(fs) {
-    this.fs = fs;
+    this.fs_ = fs;
   }
 
   fileSelectorUI.prototype.chooseFile = function(options, callback) {
@@ -33,7 +33,7 @@ TD.factory('fileSelectorUI', function($rootScope, log) {
       var flags = {
         'create': for_saving,
       };
-      self.fs.root.getFile(path, flags, callback, function(error) {
+      self.fs_.root.getFile(path, flags, callback, function(error) {
         console.error(error);
         callback();
       });

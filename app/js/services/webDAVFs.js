@@ -1,4 +1,4 @@
-TD.factory('webDAVFs', function() {
+TD.factory('webDAVFs', function($q) {
   var __extends = this.__extends || function(d, b) {
     d.prototype = Object.create(b.prototype);
   };
@@ -48,22 +48,64 @@ TD.factory('webDAVFs', function() {
       throw new Error('Not implemented');
     };
 
+    Entry.prototype.getFullUrl_ = function() {
+      return this.filesystem.url_ + this.fullPath;
+    }
+
     return Entry;
   })();
 
   var DirectoryEntry = (function(_super) {
     __extends(DirectoryEntry, _super);
 
-    function DirectoryEntry(filesystem, name, fullPath) {
+    function DirectoryEntry(filesystem, fullPath) {
+      var name = fullPath.match(/([^\/]*\/)$/)[1];
       _super.call(this, false, true, filesystem, name, fullPath);
       this.isFile = false;
       this.isDirectory = true;
     }
 
     DirectoryEntry.prototype.createReader = function() {
+      var self = this;
+      var defered = $q.defer();
+      var req = new XmlHttpRequest();
+      req.open('PROPFIND', this.getFullUrl_(), true);
+      req.overrideMimeType('text/xml');
+      req.onload = function(e) {
+        if (e.status != '207') {
+          defered.reject(new Error('HTTP error fetching properties of ' +
+                                   self.url_ + ': ' + req.statusText));
+          return;
+        }
+        var doc = e.responseXML;
+        var entryNodes = doc.getElementsByTagNameNS('DAV:', 'response');
+        var entries = [];
+        Array.prototype.forEach.apply(entryNodes, function(entry) {
+          var path =
+              entry.getElementsByTagNameNS('DAV:', 'href')[0].textContent;
+          // Skip the entry for this directory.
+          if (path == self.fullPath)
+            return;
+
+          var type = entry.getElementsByTagNameNS('DAV:', 'resourcetype')[0];
+          if (type.getElementsByTagNameNS('DAV:', 'collection').length > 0) {
+            entries.push(new DirectoryEntry(self.filesystem, path));
+          } else {
+            entries.push(new FileEntry(self.filesystem, path));
+          }
+        });
+        defered.fulfill(entries);
+      }
+
       return {
         'readEntries': function(successCallback, errorCallback) {
-          throw new Error('Not implemented');
+          // Only return the list of entries the first time readEntries() is
+          // called, an empty list afterwards.
+          if (!defered)
+            sucessCallback([]);
+
+          defered.then(successCallback, errorCallback);
+          defered = null;
         }
       };
     };
@@ -72,8 +114,7 @@ TD.factory('webDAVFs', function() {
                                                 options,
                                                 successCallback,
                                                 errorCallback) {
-      var name = path.replace(/.*\//, '');
-      var file = new FileEntry(this.filesystem, name, path);
+      var file = new FileEntry(this.filesystem, path);
       if (successCallback)
         successCallback(file);
     };
@@ -106,7 +147,7 @@ TD.factory('webDAVFs', function() {
         if (e.status != 200) {
           if (self.onerror)
             self.onerror(new Error('HTTP error uploading ' + self.url_ + ': ' +
-                                   req.status + ' ' + req.statusText));
+                                   req.statusText));
           return;
         }
 
@@ -125,25 +166,26 @@ TD.factory('webDAVFs', function() {
   var FileEntry = (function(_super) {
     __extends(FileEntry, _super);
 
-    function FileEntry(filesystem, name, fullPath) {
+    function FileEntry(filesystem, fullPath) {
+      var name = fullPath.replace(/.*\//, '');
       _super.call(this, true, false, filesystem, name, fullPath);
     }
 
     FileEntry.prototype.createWriter = function(successCallback,
                                                 errorCallback) {
-      successCallback(new FileWriter(this.filesystem.url_ + this.fullPath));
+      successCallback(new FileWriter(this.getFullUrl_()));
     };
 
     FileEntry.prototype.file = function(successCallback, errorCallback) {
       var req = new XMLHttpRequest();
-      var url = this.filesystem.url_ + this.fullPath;
+      var url = this.getFullUrl_();
       // console.log('Fetching ' + url);
       req.open('GET', url, true);
       req.responseType = 'blob';
       req.onload = function(e) {
         if (req.status != 200) {
           errorCallback(new Error('HTTP error fetching ' + url + ': ' +
-                                  req.status + ' ' + req.statusText));
+                                  req.statusText));
           return;
         }
         successCallback(req.response);
