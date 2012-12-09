@@ -20,7 +20,7 @@ function submit() {
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('go').onclick = submit;
   document.getElementById('url').onkeyup = function(e) {
-    if (e.charCode == 13)
+    if (e.keyCode == 13)
       submit();
   };
   document.getElementById('url').focus();

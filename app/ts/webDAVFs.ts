@@ -10,13 +10,12 @@ module webDAVFs {
     }
   }
 
-  export interface File extends Blob {
-    lastModifiedDate: Date;
-    name: string;
-  }
-
   export interface FileWriter {
-    // XXX
+    write(blob: Blob);
+    truncate(size: number);
+
+    onwriteend: (e) => any;
+    onerror: (e) => any;
   }
 
   export interface DirectoryReader {
@@ -92,7 +91,7 @@ module webDAVFs {
   class EntryImpl implements Entry {
     constructor(public isFile: bool,
                 public isDirectory: bool,
-                public filesystem: FileSystem,
+                public filesystem: FileSystemImpl,
                 public name: string,
                 public fullPath: string) {
     }
@@ -136,7 +135,7 @@ module webDAVFs {
     isFile = false;
     isDirectory = true;
 
-    constructor(filesystem: FileSystem,
+    constructor(filesystem: FileSystemImpl,
                 name: string,
                 fullPath: string) {
       super(false, true, filesystem, name, fullPath);
@@ -155,7 +154,10 @@ module webDAVFs {
             options?: Flags,
             successCallback?: (entry: Entry) => void,
             errorCallback?: (error: Error) => void) {
-      throw new Error('Not implemented');
+      var name = path.replace(/.*\//, '');
+      var file = new FileEntryImpl(this.filesystem, name, path);
+      if (successCallback)
+        successCallback(file);
     }
 
     getDirectory(path: string,
@@ -171,8 +173,43 @@ module webDAVFs {
     }
   }
 
+  class FileWriterImpl implements FileWriter {
+    url_: string;
+
+    onwriteend: (e) => void;
+    onerror: (e) => void;
+
+    constructor(url: string) {
+      this.url_ = url;
+    }
+
+    write(blob: Blob) {
+      var self = this;
+/*      var req = new XmlHttpRequest();*/
+      var req;
+      req.open('PUT', this.url_, true);
+      req.onload = function(e) {
+        if (e.status != 200) {
+          if (self.onerror)
+            self.onerror(new Error('HTTP error uploading ' + self.url_ + ': ' +
+                                   req.status + ' ' + req.statusText));
+          return;
+        }
+
+        if (self.onwriteend)
+          self.onwriteend(new ProgressEvent('writeend'));
+      };
+      req.send(blob);
+    }
+
+    truncate(size: number) {
+      if (this.onwriteend)
+        this.onwriteend(new ProgressEvent('writeend'));
+    }
+  }
+
   class FileEntryImpl extends EntryImpl implements FileEntry {
-    constructor(filesystem: FileSystem,
+    constructor(filesystem: FileSystemImpl,
                 name: string,
                 fullPath: string) {
       super(true, false, filesystem, name, fullPath);
@@ -185,10 +222,20 @@ module webDAVFs {
 
     file(successCallback: (file: File) => void,
          errorCallback?: (error: Error) => void) {
-/*      var file = new FileImpl(['mooh']);
-      file.name = "mooh";
-      file.lastModifiedDate = Date.now();
-      successCallback(file);
-*/    }
+      var req = new XMLHttpRequest();
+      var url = this.filesystem.url_ + this.fullPath;
+      // console.log('Fetching ' + url);
+      req.open('GET', url, true);
+      req.responseType = 'blob';
+      req.onload = function(e) {
+        if (req.status != 200) {
+          errorCallback(new Error('HTTP error fetching ' + url + ': ' +
+                                  req.status + ' ' + req.statusText));
+          return;
+        }
+        successCallback(req.response);
+      }
+      req.send();
+    }
   }
 }

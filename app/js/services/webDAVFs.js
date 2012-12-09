@@ -100,7 +100,7 @@ TD.factory('webDAVFs', function() {
 
     FileWriter.prototype.write = function(blob) {
       var self = this;
-      this.req = new XmlHttpRequest();
+      var req = new XmlHttpRequest();
       req.open('PUT', this.url_, true);
       req.onload = function(e) {
         if (e.status != 200) {
@@ -117,8 +117,8 @@ TD.factory('webDAVFs', function() {
     };
 
     FileWriter.prototype.truncate = function(size) {
-      if (self.onwriteend)
-        self.onwriteend(new ProgressEvent('loadend'));
+      if (this.onwriteend)
+        this.onwriteend(new ProgressEvent('loadend'));
     };
   })();
 
@@ -137,7 +137,7 @@ TD.factory('webDAVFs', function() {
     FileEntry.prototype.file = function(successCallback, errorCallback) {
       var req = new XMLHttpRequest();
       var url = this.filesystem.url_ + this.fullPath;
-      console.log('Fetching ' + url);
+      // console.log('Fetching ' + url);
       req.open('GET', url, true);
       req.responseType = 'blob';
       req.onload = function(e) {
@@ -155,8 +155,9 @@ TD.factory('webDAVFs', function() {
   })(Entry);
 
   return {
-    'create': function create(url) {
-      return new FileSystem(url, 'WebDAVFS: ' + url);
+    'create': function create(url, successCallback, errorCallback) {
+      var fs = new FileSystem(url, 'WebDAVFS: ' + url);
+      successCallback(fs);
     }
   };
 });

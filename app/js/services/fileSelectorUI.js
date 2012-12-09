@@ -1,18 +1,18 @@
-TD.factory('fileSelectorUI', function($rootScope, log, webDAVFs) {
+TD.factory('fileSelectorUI', function($rootScope, log) {
 
-  function fileSelectorUI(endpoint) {
-    this.fs = webDAVFs.create(endpoint);
+  function fileSelectorUI(fs) {
+    this.fs = fs;
   }
 
   fileSelectorUI.prototype.chooseFile = function(options, callback) {
     var type = options.type;
     switch (type) {
       case 'openWritableFile': {
-        this.selectFile(false, callback);
+        this.selectFile_(false, callback);
         break;
       }
       case 'saveFile': {
-        this.selectFile(true, callback);
+        this.selectFile_(true, callback);
         break;
       }
       default: {
@@ -21,7 +21,7 @@ TD.factory('fileSelectorUI', function($rootScope, log, webDAVFs) {
     }
   };
 
-  fileSelectorUI.prototype.selectFile = function(for_saving, callback) {
+  fileSelectorUI.prototype.selectFile_ = function(for_saving, callback) {
     if (this.saved_callback) {
       console.error('Multiple selectFile calls');
       this.saved_callback();
@@ -30,7 +30,13 @@ TD.factory('fileSelectorUI', function($rootScope, log, webDAVFs) {
     this.saved_callback = callback;
     var self = this;
     var unregister = $rootScope.$on('file_selected', function(event, path) {
-      self.fs.root.getFile(path, null, callback);
+      var flags = {
+        'create': for_saving,
+      };
+      self.fs.root.getFile(path, flags, callback, function(error) {
+        console.error(error);
+        callback();
+      });
       unregister();
       self.saved_callback = null;
     });
