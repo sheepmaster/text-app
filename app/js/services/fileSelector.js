@@ -1,5 +1,8 @@
-TD.factory('fileSelector', function($rootScope, $q, UIFileSelector, webDAVFs,
-                                    log) {
+TD.value('requestFileSystem', window.requestFileSystem ||
+                              window.webkitRequestFileSystem);
+
+TD.factory('fileSelector', function($rootScope, $q, log, requestFileSystem,
+                                    UIFileSelector, webDAVFs) {
 
   function createUIFileSelector(factory) {
     var defered = $q.defer();
@@ -28,9 +31,6 @@ TD.factory('fileSelector', function($rootScope, $q, UIFileSelector, webDAVFs,
   }
 
   log('Using local file system (sandboxed)');
-  var requestFileSystem = 
-      window.requestFileSystem ||
-      window.webkitRequestFileSystem;
   return createUIFileSelector(
       requestFileSystem.bind(null, window.PERSISTENT, 5 * 1024 * 1024));
 });

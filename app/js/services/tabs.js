@@ -42,8 +42,8 @@ TD.factory('Tab', function(EditSession, $rootScope, log, modeForPath) {
 });
 
 
-TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
-                            webDAVFs, lru, settings, $rootScope) {
+TD.factory('tabs', function($rootScope, editor, fsUtils, log, fileSelector, lru,
+                            settings, Tab) {
 
   var tabs = [];
 
@@ -68,14 +68,14 @@ TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
   tabs.close = function(tab) {
     tab = tab || tabs.current;
 
-    var removeTab = function() {
+    function removeTab() {
       tabs.splice(tabs.indexOf(tab), 1);
       lru.remove(tab);
       tabs.select(lru.head());
     };
 
     // save the file
-    var saveFile = function(writableFileEntry) {
+    function saveFile(writableFileEntry) {
       if (!writableFileEntry) {
         log('Closing file without saving.');
         $rootScope.$apply(removeTab);
@@ -83,9 +83,7 @@ TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
       }
 
       fsUtils.saveFile(writableFileEntry,
-                       tab.session.getValue()).then(function() {
-        removeTab();
-      });
+                       tab.session.getValue()).then(removeTab);
     };
 
     if (!tab) {
@@ -95,7 +93,8 @@ TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
 
     if (!tab.modified) {
       log('Current file not modified.');
-      return removeTab();
+      removeTab();
+      return;
     }
 
     if (tab.file) {
@@ -109,7 +108,7 @@ TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
   tabs.saveCurrent = function() {
     var tab = tabs.current;
 
-    var saveFile = function(writableFileEntry) {
+    function saveFile(writableFileEntry) {
       if (!writableFileEntry) {
         return;
       }
