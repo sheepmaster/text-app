@@ -7,7 +7,6 @@ TD.controller('App', function($scope, settings, editor, focus, $rootScope) {
 
   $scope.isSettingsVisible = false;
   $scope.isSearchVisible = false;
-  $scope.isFileSelectorVisible = false;
 
   $scope.toggleSearch = function(value) {
     $scope.isSearchVisible = angular.isDefined(value) ? value : !$scope.isSearchVisible;
@@ -80,30 +79,13 @@ TD.controller('App', function($scope, settings, editor, focus, $rootScope) {
     }
   };
 
-  $scope.openFileSelector = function() {
-    $scope.isSearchVisible = false;
-    $scope.isFileSelectorVisible = true;
-    focus('input[ng-model=file]');
-  }
-
-  $scope.cancelFileSelector = function() {
-    $scope.isFileSelectorVisible = false;
-    editor.focus();
-  }
-
-  $scope.fileSelected = function() {
-    $rootScope.$broadcast('file_selected', $scope.file);
-    $scope.file = '';
-    $scope.cancelFileSelector();
-  };
-
   $scope.$on('search', function() {
     $scope.toggleSearch();
-    $scope.cancelFileSelector();
+    focus('input[ng-model=search]');
   });
 
   $scope.$on('select_file', function() {
-    $scope.openFileSelector();
+    $scope.isSearchVisible = false;
   });
 
   $scope.$on('tab_deselected', function() {

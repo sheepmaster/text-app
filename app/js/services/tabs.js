@@ -42,55 +42,10 @@ TD.factory('Tab', function(EditSession, $rootScope, log, modeForPath) {
 });
 
 
-TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, lru, settings, $rootScope) {
+TD.factory('tabs', function($q, editor, fsUtils, log, Tab, fileSelector,
+                            webDAVFs, lru, settings, $rootScope) {
 
   var tabs = [];
-
-  function findFileSelector() {
-    var url = (chrome.app && chrome.app.window) ?
-        chrome.app.window.current().webDAVUrl :
-        '/dav/';
-
-    if (url) {
-      log('Using WebDAV filesystem at ' + url);
-      var defered = $q.defer();
-      webDAVFs.create(url, function(fs) {
-        defered.resolve(new fileSelectorUI(fs));
-        $rootScope.$digest();
-      }, function(error) {
-        defered.reject(error);
-        $rootScope.$digest();
-      });
-      return defered.promise;
-    }
-
-    if (chrome.fileSystem) {
-      log('Using local file system');
-      return chrome.fileSystem;
-    }
-
-    var requestFileSystem = 
-        window.requestFileSystem ||
-        window.webkitRequestFileSystem;
-    log('Using local file system (sandboxed)');
-    var defered = $q.defer();
-    requestFileSystem(window.PERSISTENT, 5 * 1024 * 1024, function(fs) {
-      defered.resolve(new fileSelectorUI(fs));
-      $rootScope.$digest();
-    }, function(error) {
-      defered.reject(error);
-      $rootScope.$digest();
-    });
-    return defered.promise;
-  }
-
-  var fileSelectorPromise = findFileSelector();
-  function fileSelector() {
-    var args = Array.prototype.slice.call(arguments);
-    fileSelectorPromise.then(function(fileSelector) {
-      fileSelector.chooseFile.apply(fileSelector, args);
-    });
-  }
 
   tabs.select = function(tab) {
     if (tabs.current) {
@@ -127,7 +82,8 @@ TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, 
         return;
       }
 
-      fs.saveFile(writableFileEntry, tab.session.getValue()).then(function() {
+      fsUtils.saveFile(writableFileEntry,
+                       tab.session.getValue()).then(function() {
         removeTab();
       });
     };
@@ -145,7 +101,7 @@ TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, 
     if (tab.file) {
       saveFile(tab.file);
     } else {
-      fileSelector({type: "saveFile"}, saveFile);
+      fileSelector.chooseFile({type: "saveFile"}, saveFile);
     }
   };
 
@@ -158,7 +114,8 @@ TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, 
         return;
       }
 
-      fs.saveFile(writableFileEntry, tab.session.getValue()).then(function() {
+      fsUtils.saveFile(writableFileEntry,
+                       tab.session.getValue()).then(function() {
         tab.setFileEntry(writableFileEntry);
       });
     };
@@ -171,13 +128,13 @@ TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, 
     if (tab.file) {
       saveFile(tab.file);
     } else {
-      fileSelector({type: "saveFile"}, saveFile);
+      fileSelector.chooseFile({type: "saveFile"}, saveFile);
     }
   };
 
 
   tabs.open = function() {
-    fileSelector({type: 'openWritableFile'}, function(fileEntry) {
+    fileSelector.chooseFile({type: 'openWritableFile'}, function(fileEntry) {
       if (!fileEntry) {
         return;
       }
@@ -186,7 +143,7 @@ TD.factory('tabs', function($q, editor, fs, log, Tab, fileSelectorUI, webDAVFs, 
         return;
       }
 
-      fs.loadFile(fileEntry).then(function(content) {
+      fsUtils.loadFile(fileEntry).then(function(content) {
         // TODO(vojta): make this nicer
         var firstTab = tabs[0];
         var closeInitialTab = !!(tabs.length === 1 && !firstTab.file && !firstTab.modified);

@@ -68,13 +68,13 @@ TD.factory('webDAVFs', function($q) {
     DirectoryEntry.prototype.createReader = function() {
       var self = this;
       var defered = $q.defer();
-      var req = new XmlHttpRequest();
+      var req = new XMLHttpRequest();
       req.open('PROPFIND', this.getFullUrl_(), true);
       req.overrideMimeType('text/xml');
       req.onload = function(e) {
-        if (e.status != '207') {
-          defered.reject(new Error('HTTP error fetching properties of ' +
-                                   self.url_ + ': ' + req.statusText));
+        if (req.status != '207') {
+          defered.reject('HTTP error fetching properties of ' + self.url_ +
+                         ': ' + req.status + ' ' + req.statusText);
           return;
         }
         var doc = e.responseXML;
@@ -141,13 +141,13 @@ TD.factory('webDAVFs', function($q) {
 
     FileWriter.prototype.write = function(blob) {
       var self = this;
-      var req = new XmlHttpRequest();
+      var req = new XMLHttpRequest();
       req.open('PUT', this.url_, true);
       req.onload = function(e) {
-        if (e.status != 200) {
+        if (req.status != 200) {
           if (self.onerror)
-            self.onerror(new Error('HTTP error uploading ' + self.url_ + ': ' +
-                                   req.statusText));
+            self.onerror('HTTP error uploading ' + self.url_ + ': ' +
+                         req.status + ' ' + req.statusText);
           return;
         }
 
@@ -161,6 +161,8 @@ TD.factory('webDAVFs', function($q) {
       if (this.onwriteend)
         this.onwriteend(new ProgressEvent('loadend'));
     };
+
+    return FileWriter;
   })();
 
   var FileEntry = (function(_super) {
@@ -184,8 +186,8 @@ TD.factory('webDAVFs', function($q) {
       req.responseType = 'blob';
       req.onload = function(e) {
         if (req.status != 200) {
-          errorCallback(new Error('HTTP error fetching ' + url + ': ' +
-                                  req.statusText));
+          errorCallback('HTTP error fetching ' + url + ': ' +
+                        req.status + ' ' + req.statusText);
           return;
         }
         successCallback(req.response);

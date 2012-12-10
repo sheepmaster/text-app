@@ -41,9 +41,10 @@
   <a ng-click="toggleSearch()" class="icon-remove full"></a>
 </div>
 
-<div id="file-selector" class="overlay open-{{isFileSelectorVisible}}">
+<div ng-controller="FileSelector" id="file-selector" class="overlay open-{{isFileSelectorVisible}}">
   <div class="controls">
-    <input type="text" placeholder="Enter a filename" id="file" ng-model="file" on-enter="fileSelected()">
+    <input type="text" placeholder="Enter a filename" id="file" list="files" ng-model="file" on-enter="fileSelected()">
+    <datalist id="files"></datalist>
     <a ng-click="fileSelected()" class="icon-chevron-right full"></a>
     <a ng-click="cancelFileSelector()" class="icon-remove full"></a>
   </div>
@@ -111,6 +112,7 @@
 
 <!--controllers-->
 <script src="js/controllers/App.js" type="text/javascript"></script>
+<script src="js/controllers/FileSelector.js" type="text/javascript"></script>
 <script src="js/controllers/Settings.js" type="text/javascript"></script>
 <script src="js/controllers/StatusBar.js" type="text/javascript"></script>
 <script src="js/controllers/Tabs.js" type="text/javascript"></script>
@@ -120,14 +122,15 @@
 <script src="js/services/appWindow.js" type="text/javascript"></script>
 <script src="js/services/chromeFs.js" type="text/javascript"></script>
 <script src="js/services/editor.js" type="text/javascript"></script>
-<script src="js/services/fileSelectorUI.js" type="text/javascript"></script>
+<script src="js/services/fileSelector.js" type="text/javascript"></script>
 <script src="js/services/focus.js" type="text/javascript"></script>
-<script src="js/services/fs.js" type="text/javascript"></script>
+<script src="js/services/fsUtils.js" type="text/javascript"></script>
 <script src="js/services/log.js" type="text/javascript"></script>
 <script src="js/services/modeForPath.js" type="text/javascript"></script>
 <script src="js/services/settings.js" type="text/javascript"></script>
 <script src="js/services/storage.js" type="text/javascript"></script>
 <script src="js/services/tabs.js" type="text/javascript"></script>
+<script src="js/services/uiFileSelector.js" type="text/javascript"></script>
 <script src="js/services/webDAVFs.js" type="text/javascript"></script>
 
 <!--directives-->

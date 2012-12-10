@@ -1,10 +1,10 @@
-TD.factory('fileSelectorUI', function($rootScope, log) {
+TD.factory('UIFileSelector', function($rootScope, log) {
 
-  function fileSelectorUI(fs) {
+  function UIFileSelector(fs) {
     this.fs_ = fs;
   }
 
-  fileSelectorUI.prototype.chooseFile = function(options, callback) {
+  UIFileSelector.prototype.chooseFile = function(options, callback) {
     var type = options.type;
     switch (type) {
       case 'openWritableFile': {
@@ -21,7 +21,7 @@ TD.factory('fileSelectorUI', function($rootScope, log) {
     }
   };
 
-  fileSelectorUI.prototype.selectFile_ = function(for_saving, callback) {
+  UIFileSelector.prototype.selectFile_ = function(for_saving, callback) {
     if (this.saved_callback) {
       console.error('Multiple selectFile calls');
       this.saved_callback();
@@ -33,9 +33,11 @@ TD.factory('fileSelectorUI', function($rootScope, log) {
       var flags = {
         'create': for_saving,
       };
-      self.fs_.root.getFile(path, flags, callback, function(error) {
-        console.error(error);
-        callback();
+      self.fs_.then(function(fs) {
+        fs.root.getFile(path, flags, callback, function(error) {
+          console.error(error);
+          callback();
+        });
       });
       unregister();
       self.saved_callback = null;
@@ -44,5 +46,5 @@ TD.factory('fileSelectorUI', function($rootScope, log) {
     $rootScope.$broadcast('select_file');
   };
 
-  return fileSelectorUI;
+  return UIFileSelector;
 });

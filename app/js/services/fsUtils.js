@@ -1,4 +1,4 @@
-TD.factory('fs', function($q, $rootScope, log) {
+TD.factory('fsUtils', function($q, $rootScope, log) {
 
   var createErrorHandler = function(defered) {
     return function(e) {
