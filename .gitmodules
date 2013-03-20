@@ -1,3 +1,6 @@
 [submodule "app/lib/ace"]
 	path = app/lib/ace
   url = https://github.com/ajaxorg/ace-builds.git
+[submodule "app/lib/q"]
+	path = app/lib/q
+	url = https://github.com/kriskowal/q.git

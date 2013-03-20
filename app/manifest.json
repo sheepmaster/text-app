@@ -15,7 +15,10 @@
     "background": {
       "scripts": [
         "js/background.js",
-        "js/util.js"
+        "js/util.js",
+        "lib/q/q.js",
+        "js/server.js",
+        "js/rmate_server.js"
       ]
     }
   },
@@ -24,7 +27,11 @@
     "clipboardWrite",
     "storage",
     "unlimitedStorage",
-    {"fileSystem": ["write"]}
+    {"fileSystem": ["write"]},
+    {"socket": [
+        "tcp-listen::52698"
+      ]
+    }
   ],
   "file_handlers": {
     "text": {
