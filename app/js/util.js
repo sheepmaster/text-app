@@ -35,16 +35,6 @@ util.handleFSError = function(e) {
  */
 util.writeFile = function(entry, content, onsuccess) {
   var blob = new Blob([content], {type: 'text/plain'});
-  chrome.fileSystem.getWritableEntry(
-      entry, util.truncateAndWriteWritable_.bind(null, blob, onsuccess));
-};
-
-/**
- * @param {FileEntry} entry
- * @param {Blob} blob
- * @param {Function} onsuccess
- */
-util.truncateAndWriteWritable_ = function(blob, onsuccess, entry) {
   entry.createWriter(function(writer) {
     writer.onerror = util.handleFSError;
     writer.onwrite = util.writeToWriter_.bind(null, writer, blob, onsuccess);
