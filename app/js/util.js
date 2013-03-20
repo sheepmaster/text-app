@@ -31,7 +31,7 @@ util.handleFSError = function(e) {
  * @param {FileEntry} entry
  * @param {string} content
  * @param {Function} onsuccess
- * Make a writable copy of entry, truncate the file and write the content.
+ * Truncate the file and write the content.
  */
 util.writeFile = function(entry, content, onsuccess) {
   var blob = new Blob([content], {type: 'text/plain'});
