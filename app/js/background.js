@@ -27,36 +27,42 @@ Background.prototype.ifShowFrame_ = function() {
 };
 
 /**
- * @param {Object.<string, Object>} launchData
- * Handle onLaunch event.
+ * @param {Array.<FileEntry>} entries The file entries to be opened.
+ * Opens the list of entries in an existing or new window.
  */
-Background.prototype.launch = function(launchData) {
-  var options = {
-    frame: (this.ifShowFrame_() ? 'chrome' : 'none'),
-    minWidth: 400,
-    minHeight: 400,
-    width: 700,
-    height: 700
-  };
-
-  var entries = [];
-  if (launchData && launchData['items']) {
-    for (var i = 0; i < launchData['items'].length; i++) {
-      entries.push(launchData['items'][i]['entry']);
-    }
-  }
-
+Background.prototype.openEntries = function(entries) {
   if (entries.length > 0 && this.windows_.length > 0) {
     console.log('Opening files in existing window.');
     this.windows_[0].openEntries(entries);
   } else {
     this.entriesToOpen_.push.apply(this.entriesToOpen_, entries);
     console.log('Files to open:', this.entriesToOpen_);
+    var options = {
+      frame: (this.ifShowFrame_() ? 'chrome' : 'none'),
+      minWidth: 400,
+      minHeight: 400,
+      width: 700,
+      height: 700
+    };
     chrome.app.window.create('index.html', options, function(win) {
       console.log('Window opened:', win);
       win.onClosed.addListener(this.onWindowClosed.bind(this, win));
     }.bind(this));
   }
+};
+
+/**
+ * @param {Object.<string, Object>} launchData
+ * Handle onLaunch event.
+ */
+Background.prototype.launch = function(launchData) {
+  var entries = [];
+  if (launchData && launchData['items']) {
+    entries = launchData['items'].map(function(item) {
+      return item.entry;
+    });
+  }
+  this.openEntries(entries);
 };
 
 /**
