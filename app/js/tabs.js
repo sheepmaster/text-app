@@ -69,6 +69,14 @@ Tab.prototype.getPath = function() {
   return this.path_;
 };
 
+Tab.getDisplayPath_ = function(fileEntry, callback) {
+  // This is the check the JSON schema validator uses.
+  if (Object.prototype.toString.call(fileEntry) == '[object FileEntry]')
+    chrome.fileSystem.getDisplayPath(fileEntry, callback);
+  else
+    callback(fileEntry.fullPath);
+};
+
 /**
  * @param {number} tabSize
  */
@@ -84,7 +92,7 @@ Tab.prototype.setWrapping = function(wrapLines) {
 };
 
 Tab.prototype.updatePath_ = function() {
-  chrome.fileSystem.getDisplayPath(this.entry_, function(path) {
+  Tab.getDisplayPath_(this.entry_, function(path) {
     this.path_ = path;
   }.bind(this));
 };
@@ -288,11 +296,10 @@ Tabs.prototype.getFilesToSave = function() {
 };
 
 Tabs.prototype.openFileEntry = function(entry) {
-  if (!entry) {
+  if (!entry)
     return;
-  }
 
-  var thisPath = chrome.fileSystem.getDisplayPath(entry, function(path) {
+  Tab.getDisplayPath_(entry, function(path) {
     for (var i = 0; i < this.tabs_.length; i++) {
       if (this.tabs_[i].getPath() === path) {
         this.showTab(this.tabs_[i].getId());
