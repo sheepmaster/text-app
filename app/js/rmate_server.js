@@ -82,7 +82,7 @@ RMateFileEntry.prototype = {
     this.closed_.resolve();
   },
 
-  get closed(){
+  get closed() {
     return this.closed_.promise;
   }
 };

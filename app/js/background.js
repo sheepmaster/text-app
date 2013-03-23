@@ -90,6 +90,12 @@ Background.prototype.onWindowClosed = function(win) {
     var contents = toSave[i].contents;
     this.saveFile_(entry, contents);
   }
+
+  var toClose = td.getFiles();
+  toClose.forEach(function(entry) {
+    if (entry.close)
+      entry.close();
+  });
 };
 
 /**

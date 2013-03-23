@@ -243,6 +243,10 @@ Tabs.prototype.closeTab_ = function(tab) {
       break;
   }
 
+  var entry = tab.getEntry();
+  if (entry && entry.close)
+    entry.close();
+
   this.tabs_.splice(i, 1);
   $.event.trigger('tabclosed', tab);
 };
@@ -276,6 +280,15 @@ Tabs.prototype.saveAs = function(opt_tab, opt_close) {
   chrome.fileSystem.chooseEntry(
       {'type': 'saveFile'},
       this.onSaveAsFileOpen_.bind(this, opt_tab, opt_close || false));
+};
+
+Tabs.prototype.getFiles = function() {
+  var files = [];
+  return this.tabs_.forEach(function(tab) {
+    if (tab.getEntry())
+      files.push(tab.getEntry());
+  });
+  return files;
 };
 
 /**
