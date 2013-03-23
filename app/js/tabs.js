@@ -74,7 +74,7 @@ Tab.getDisplayPath_ = function(fileEntry, callback) {
   if (Object.prototype.toString.call(fileEntry) == '[object FileEntry]')
     chrome.fileSystem.getDisplayPath(fileEntry, callback);
   else
-    callback(fileEntry.fullPath);
+    callback(fileEntry.name);
 };
 
 /**

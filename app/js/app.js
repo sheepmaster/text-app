@@ -70,6 +70,10 @@ TextDrive.prototype.getFilesToSave = function() {
   }
 };
 
+TextDrive.prototype.getFiles = function() {
+  return this.tabs_.getFiles();
+};
+
 var textDrive = new TextDrive();
 
 $(document).ready(textDrive.init.bind(textDrive));

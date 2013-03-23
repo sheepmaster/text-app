@@ -63,23 +63,21 @@ Socket.prototype = {
     });
   },
 
-  'write': function(bufOrPromise) {
+  'write': function(buf) {
     var socketId = this.socketId_;
-    return Q.when(bufOrPromise, function(buf) {
-      var defered = Q.defer();
-      chrome.socket.write(socketId, buf, function(writeInfo) {
-        if (writeInfo.bytesWritten < 0) {
-          defered.reject('Write error: ' + writeInfo.bytesWritten);
-          return;
-        }
-        defered.resolve(writeInfo.bytesWritten);
-      });
-      return defered.promise;
+    var defered = Q.defer();
+    chrome.socket.write(socketId, buf, function(writeInfo) {
+      if (writeInfo.bytesWritten < 0) {
+        defered.reject('Write error: ' + writeInfo.bytesWritten);
+        return;
+      }
+      defered.resolve(writeInfo.bytesWritten);
     });
+    return defered.promise;
   },
 
   'close': function() {
-    chrome.socket.disconnect(this.socketId_);
+    chrome.socket.destroy(this.socketId_);
   }
 };
 
@@ -132,11 +130,6 @@ function setStorage(key, value) {
   return defered.promise;
 }
 
-function Server(interface, port) {
-  this.interface_ = interface;
-  this.port_ = port;
-}
-
 function getSocketInfo(socketId) {
   var defered = Q.defer();
   chrome.socket.getInfo(socketId, function(socketInfo) {
@@ -145,11 +138,20 @@ function getSocketInfo(socketId) {
   return defered.promise;
 }
 
+function Server(id, onConnected) {
+  this.id_= id;
+  this.onConnected_ = onConnected;
+}
+
 Server.prototype = {
-  'start': function(onConnected) {
-    var interface = this.interface_;
-    var port = this.port_;
-    getStorage(interface + ':' + port)
+  'getStatus': function() {
+    // TODO
+  },
+
+  'start': function(interface, port) {
+    var onConnected = this.onConnected_;
+    var id = 'tcp-server-socket-id-' + this.id_;
+    getStorage(id)
     .then(function(socketId) {
       if (!socketId)
         return;
@@ -167,7 +169,7 @@ Server.prototype = {
       return createServerSocket().then(function(socketId) {
         return listenOnSocket(socketId, interface, port)
         .then(function() {
-          setStorage(interface + ':' + port, socketId).done();
+          setStorage(id).done();
           return socketId;
         });
       });
@@ -184,6 +186,10 @@ Server.prototype = {
         return acceptConnection(socketId);
       });
     }
+  },
+
+  'stop': function() {
+    // TODO
   }
 };
 

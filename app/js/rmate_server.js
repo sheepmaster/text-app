@@ -1,27 +1,21 @@
 (function() {
 
-function blobToString(blob) {
-  var defered = Q.defer();
-  var fr = new FileReader();
-  fr.onload = function(e) {
-    defered.resolve(this.result);
-  };
-  fr.readAsText(blob);
-  return defered.promise;
-}
-
 function readLineAndChomp(socket) {
   return socket.readline()
   .then(function(bufs) {
-    return blobToString(new Blob(bufs));
-  }).then(function(string) {
-    return string.replace(/\n$/, '');
+    return bufs.map(function(buf) {
+      return String.fromCharCode.apply(null, buf);
+    }).join('').replace(/\n$/, '');
   });
 }
 
-function RMateFileWriter(socket, token) {
-  this.socket_ = socket;
-  this.token_ = token;
+function encodeString(str) {
+  var buf = new ArrayBuffer(str.length);
+  var bufView = new Uint8Array(buf);
+  for (var i=0; i<str.length; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
 }
 
 function blobToArrayBuffer(blob) {
@@ -34,25 +28,28 @@ function blobToArrayBuffer(blob) {
   return defered.promise;
 }
 
+function RMateFileWriter(socket, token) {
+  this.socket_ = socket;
+  this.token_ = token;
+}
+
 RMateFileWriter.prototype = {
   'write': function(blob) {
     var socket = this.socket_;
-    var onwrite = self.onwrite;
-    var toWrite =
-        [encodeString('save\n' +
-                      'token: ' + this.token_ + '\n' +
-                      'data: ' + blob.size + '\n'),
-         blobToArrayBuffer(blob),
-         encodeString('\n')];
-    toWrite.reduce(function(promise, item) {
-      return promise.then(function() {
-        return socket.write(item);
-      });
-    }, Q())
-    .then(function() {
+    var onwrite = this.onwrite;
+    blobToArrayBuffer(
+        new Blob(['save\n' +
+                  'token: ' + this.token_ + '\n' +
+                  'data: ' + blob.size + '\n',
+                 blob,
+                 '\n']))
+    .then(function(buf) {
+      socket.write(buf);
+    })
+    .done(function() {
       if (onwrite)
         onwrite(new ProgressEvent('load'));
-    }).done();
+    });
   },
 
   'truncate': function(size) {
@@ -87,19 +84,15 @@ RMateFileEntry.prototype = {
   }
 };
 
-function encodeString(str) {
-  var buf = new ArrayBuffer(str.length);
-  var bufView = new Uint8Array(buf);
-  for (var i=0; i<str.length; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-}
-
-function handleRMateConnection(socket, callback) {
+function handleRMateConnection(socket) {
+  var handles = [];
+  var entries = [];
   var greeting = '220 localhost RMATE TextHyperDrive (Chrome XXX)\n';
   return socket.write(encodeString(greeting))
-  .then(readFile);
+  .then(readFile).then(function() {
+    background.openEntries(entries);
+    return Q.all(handles);
+  });
   function readFile() {
     return readLineAndChomp(socket)
     .then(function(command) {
@@ -117,7 +110,9 @@ function handleRMateConnection(socket, callback) {
         .then(function(line) {
           if (!line) {
             // Finished reading a single file.
-            callback(new RMateFileEntry(params, file, socket));
+            var fileEntry = new RMateFileEntry(params, file, socket);
+            entries.push(fileEntry);
+            handles.push(fileEntry.closed);
             return readFile();
           }
 
@@ -156,16 +151,6 @@ function handleRMateConnection(socket, callback) {
   }
 }
 
-new Server('127.0.0.1', 52698).start(function(socket) {
-  var handles = [];
-  var entries = [];
-  return handleRMateConnection(socket, function(fileEntry) {
-    entries.push(fileEntry);
-    handles.push(fileEntry.closed);
-  }).then(function() {
-    background.openEntries(entries);
-    return Q.all(handles);
-  });
-});
+new Server('rmate', handleRMateConnection).start('127.0.0.1', 52698);
 
 })();
