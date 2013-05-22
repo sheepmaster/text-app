@@ -21,9 +21,19 @@ function Settings() {
  */
 Settings.AREA = 'sync';
 
+/**
+ * @type {Object.<string, Object>}
+ */
 Settings.SETTINGS = {
   'autosave': {'default': false, 'type': 'boolean', 'widget': 'checkbox'},
-  'tabsize': {'default': 8, 'type': 'integer', 'widget': 'number'},
+  // 'fontsize' is not shown in Settings tab, only changed with
+  // Ctrl-+ / Ctrl--
+  'fontsize': {'default': 14, 'type': 'number', 'widget': null},
+  'linenumbers': {'default': true, 'type': 'boolean', 'widget': 'checkbox'},
+  'margin': {'default': false, 'type': 'boolean', 'widget': 'checkbox'},
+  'margincol': {'default': 80, 'type': 'integer', 'widget': 'number'},
+  'tabsize': {'default': 2, 'type': 'integer', 'widget': 'number'},
+  'theme': {'default': 'default', 'type': 'string', 'widget': 'select'},
   'wraplines': {'default': true, 'type': 'boolean', 'widget': 'checkbox'}
 };
 

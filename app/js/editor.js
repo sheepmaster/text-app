@@ -3,21 +3,27 @@ var UndoManager = ace.require('ace/undomanager').UndoManager;
 
 /**
  * @constructor
- * @param {Element} editorElement
+ * @param {string} elementId
  * @param {Settings} settings
  */
-function Editor(editorElement, settings) {
-  this.element_ = editorElement;
+function Editor(elementId, settings) {
+  this.elementId_ = elementId;
   this.settings_ = settings;
-  this.editor_ = ace.edit(this.element_);
+  this.themeCss_ = null;
+  this.editor_ = ace.edit(this.elementId_);
   this.initTheme_();
   this.editor_.on('change', this.onChange.bind(this));
   this.editor_.setShowPrintMargin(false);
-  this.editor_.setFontSize('14px');
   this.editor_.setShowFoldWidgets(false);
   this.editor_.commands.bindKey('ctrl-shift-l', null);
   $(document).bind('resize', this.editor_.resize.bind(this.editor_));
+  $(document).bind('settingschange', this.onSettingsChanged_.bind(this));
   $(document).bind('tabrenamed', this.onTabRenamed_.bind(this));
+  if (this.settings_.isReady()) {
+    this.editor_.initFromSettings_();  // In case the settings are already loaded.
+  } else {
+    $(document).bind('settingsready', this.initFromSettings_.bind(this));
+  }
 }
 
 Editor.EXTENSION_TO_MODE = {
@@ -84,36 +90,50 @@ Editor.EXTENSION_TO_MODE = {
     'yaml': 'yaml'};
 
 Editor.prototype.initTheme_ = function() {
-  var stylesheet = null;
+  var stylesheet;
+  var match;
+  var cssText;
+  var name;
+  var themeAceModule;
+
+  function initThemeModule(name, css, require, exports, module) {
+    console.log('initThemeModule');
+    exports.cssClass = 'ace-text-' + name;
+    exports.cssText = css;
+    var dom = require('../lib/dom');
+    dom.importCssString(exports.cssText, exports.cssClass);
+  }
 
   for (var i = 0; i < document.styleSheets.length; i++) {
-      if (document.styleSheets[i].href &&
-          document.styleSheets[i].href.indexOf("ace.css") ) {
-        stylesheet = document.styleSheets[i];
-        break;
-      }
+    if (!document.styleSheets[i].href)
+      continue;
+    console.log(document.styleSheets[i].href);
+    match = document.styleSheets[i].href.match(/theme-(\w+)\.css$/);
+    if (!match)
+      continue;
+    name = match[1];
+    stylesheet = document.styleSheets[i];
+
+    cssText = '';
+    for (var j = 0; j < stylesheet.cssRules.length; j++) {
+      cssText += '\n' + stylesheet.cssRules[j].cssText;
+    }
+
+    console.log(name);
+
+    ace.define(
+        'ace/theme/text_' + name,
+        ['require', 'exports', 'module', 'ace/lib/dom'],
+        initThemeModule.bind(null, name, cssText));
   }
+};
 
-  if (!stylesheet) {
-    console.error('Didn\'t find stylesheet for Ace');
-  }
-
-  var cssText = '';
-  for (var i = 0; i < stylesheet.cssRules.length; i++) {
-    cssText += '\n' + stylesheet.cssRules[i].cssText;
-  }
-
-  ace.define(
-    'ace/theme/textdrive',
-    ['require', 'exports', 'module', 'ace/lib/dom'],
-    function(require, exports, module) {
-      exports.cssClass = 'ace-td';
-      exports.cssText = cssText;
-      var dom = require('../lib/dom');
-      dom.importCssString(exports.cssText, exports.cssClass);
-    });
-
-   this.editor_.setTheme('ace/theme/textdrive');
+Editor.prototype.initFromSettings_ = function() {
+  this.setFontSize(this.settings_.get('fontsize'));
+  this.showHideLineNumbers_(this.settings_.get('linenumbers'));
+  this.showHideMargin_(this.settings_.get('margin'),
+                       this.settings_.get('margincol'));
+  this.setTheme_();
 };
 
 /**
@@ -193,4 +213,86 @@ Editor.prototype.onTabRenamed_ = function(e, tab) {
   var extension = tab.getExtension();
   if (extension)
     this.setMode(tab.getSession(), extension);
+};
+
+/**
+ * @param {Event} e
+ * @param {string} key
+ * @param {*} value
+ */
+Editor.prototype.onSettingsChanged_ = function(e, key, value) {
+  switch (key) {
+    case 'fontsize':
+      this.setFontSize(value);
+      break;
+
+    case 'linenumbers':
+      this.showHideLineNumbers_(value);
+      break;
+
+    case 'margin':
+    case 'margincol':
+      this.showHideMargin_(this.settings_.get('margin'),
+                           this.settings_.get('margincol'));
+      break;
+
+    case 'theme':
+      this.setTheme_();
+      break;
+  }
+}
+
+/**
+ * The actual changing of the font size will be triggered by settings change
+ * event.
+ */
+Editor.prototype.increaseFontSize = function() {
+  var fontSize = this.settings_.get('fontsize');
+  this.settings_.set('fontsize', fontSize * (9/8));
+};
+
+/**
+ * The actual changing of the font size will be triggered by settings change
+ * event.
+ */
+Editor.prototype.decreseFontSize = function() {
+  var fontSize = this.settings_.get('fontsize');
+  this.settings_.set('fontsize', fontSize / (9/8));
+};
+
+/**
+ * @param {number} fontSize
+ * Update font size from settings.
+ */
+Editor.prototype.setFontSize = function(fontSize) {
+  this.editor_.setFontSize(Math.round(fontSize) + 'px');
+};
+
+/**
+ * @param {boolean} show
+ */
+Editor.prototype.showHideLineNumbers_ = function(show) {
+  $('#' + this.elementId_).toggleClass('hide-line-numbers', !show);
+  this.editor_.resize(true /* force */);
+};
+
+/**
+ * @param {string} theme
+ */
+Editor.prototype.setTheme_ = function() {
+  var theme = this.settings_.get('theme');
+  console.log('setTheme_', theme);
+  this.editor_.setTheme('ace/theme/text_' + theme);
+  $('body').attr('theme', theme);
+};
+
+/**
+ * @param {boolean} show
+ * @param {number} col
+ */
+Editor.prototype.showHideMargin_ = function(show, col) {
+  this.editor_.setShowPrintMargin(show);
+  if (show) {
+    this.editor_.setPrintMarginColumn(col);
+  }
 };
