@@ -144,8 +144,36 @@ function Server(id, onConnected) {
 }
 
 Server.prototype = {
-  'getStatus': function() {
-    // TODO
+  'setInitialState': function(interface, port, running) {
+    var id = 'tcp-server-socket-id-' + this.id_;
+    this.interface_ = interface;
+    this.port_ = port;
+    this.running_ = running;
+    if (!running)
+      return;
+
+    getStorage(id).then(function(socketId) {
+      if (!socketId)
+        return;
+
+      return getSocketInfo(socketId).then(function(socketInfo) {
+        if (socketInfo.localAddress === interface &&
+            socketInfo.localPort === port) {
+          return socketId;
+        }
+      });
+    }).then(function(socketId) {
+      if (socketId)
+        return socketId;
+
+      return createServerSocket().then(function(socketId) {
+        return listenOnSocket(socketId, interface, port)
+        .then(function() {
+          setStorage(id).done();
+          return socketId;
+        });
+      });
+    }).done(acceptConnection);
   },
 
   'start': function(interface, port) {
